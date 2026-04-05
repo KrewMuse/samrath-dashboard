@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Samrath's World</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: -apple-system, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a1628 0%, #1a237e 50%, #0d47a1 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding-bottom: 80px;
+    }
+
+    /* HEADER */
+    header {
+      background: rgba(10,22,40,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid rgba(30,136,229,0.3);
+      padding: 16px 20px;
+      text-align: center;
+      position: sticky; top: 0; z-index: 200;
+    }
+    header h1 {
+      font-size: 1.6em;
+      background: linear-gradient(135deg, #1e88e5, #00bcd4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-weight: 900; letter-spacing: 1px;
+    }
+    .header-row {
+      display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 8px;
+    }
+    .points-display {
+      font-size: 1.4em; font-weight: bold; color: #ffd700;
+      text-shadow: 0 0 10px rgba(255,215,0,0.5);
+    }
+    .streak-badge {
+      background: rgba(255,87,34,0.2); border: 1px solid #ff5722;
+      border-radius: 20px; padding: 4px 12px; font-size: 0.85em; color: #ff8a65;
+    }
+    .progress-wrap {
+      background: rgba(255,255,255,0.1); border-radius: 20px;
+      overflow: hidden; height: 8px; margin-top: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1e88e5, #00bcd4);
+      width: 0%; transition: width 0.4s ease;
+      border-radius: 20px;
+    }
+
+    /* TABS */
+    .tab-nav {
+      display: flex; gap: 6px; padding: 10px 12px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      background: rgba(10,22,40,0.7); border-bottom: 1px solid rgba(30,136,229,0.2);
+      scrollbar-width: none;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex-shrink: 0;
+      background: rgba(30,136,229,0.15);
+      border: 1.5px solid rgba(30,136,229,0.35);
+      color: #90caf9; padding: 9px 16px;
+      border-radius: 20px; cursor: pointer;
+      font-size: 0.85em; font-weight: 600;
+      transition: all 0.2s; white-space: nowrap;
+      min-height: 40px;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #1e88e5, #00bcd4);
+      border-color: #00bcd4; color: #fff;
+      box-shadow: 0 0 16px rgba(30,136,229,0.5);
+    }
+
+    /* CONTENT */
+    .content { max-width: 820px; margin: 0 auto; padding: 16px; }
+    .tab-pane { display: none; animation: fadeIn 0.25s ease; }
+    .tab-pane.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* CARDS */
+    .card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(30,136,229,0.25);
+      border-radius: 18px; padding: 18px; margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .card h2 { color: #00bcd4; font-size: 1.2em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .card h3 { color: #1e88e5; font-size: 0.95em; margin: 12px 0 8px; }
+
+    /* TASK ITEMS */
+    .task-list { list-style: none; }
+    .task-item {
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px; padding: 13px 14px;
+      margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+      cursor: pointer; transition: background 0.15s; min-height: 48px;
+    }
+    .task-item:active { background: rgba(30,136,229,0.2); }
+    .task-item.completed { opacity: 0.55; }
+    .task-item.completed .task-text { text-decoration: line-through; color: #90caf9; }
+    .task-checkbox { width: 22px; height: 22px; cursor: pointer; accent-color: #00bcd4; flex-shrink: 0; }
+    .task-text { flex: 1; font-size: 0.95em; line-height: 1.35; }
+    .pts-badge {
+      background: rgba(255,215,0,0.15); color: #ffd700;
+      padding: 3px 9px; border-radius: 10px; font-size: 0.8em; font-weight: bold; flex-shrink: 0;
+    }
+
+    /* DAILY AFFIRMATION BANNER */
+    .aff-banner {
+      background: linear-gradient(135deg, rgba(30,136,229,0.2), rgba(0,188,212,0.15));
+      border: 1.5px solid rgba(0,188,212,0.4);
+      border-radius: 16px; padding: 18px;
+      margin-bottom: 16px; text-align: center;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .aff-banner:active { transform: scale(0.98); }
+    .aff-banner .aff-label { font-size: 0.75em; color: #00bcd4; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    .aff-banner .aff-text { font-size: 1.1em; font-weight: bold; color: #fff; line-height: 1.4; }
+    .aff-banner .aff-tap { font-size: 0.75em; color: #90caf9; margin-top: 8px; }
+    .aff-banner.said { border-color: #ffd700; background: rgba(255,215,0,0.1); }
+
+    /* DONE FOR TODAY BUTTON */
+    .done-btn {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, #1b5e20, #2e7d32);
+      border: 2px solid #4caf50; border-radius: 14px;
+      color: #fff; font-size: 1.1em; font-weight: bold;
+      cursor: pointer; margin-bottom: 16px; min-height: 52px;
+      transition: all 0.2s;
+    }
+    .done-btn:disabled { opacity: 0.5; cursor: default; }
+    .done-btn:not(:disabled):active { transform: scale(0.98); }
+
+    /* REWARDS */
+    .rewards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 12px; }
+    .reward-card {
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,215,0,0.25);
+      border-radius: 14px; padding: 14px; text-align: center;
+      cursor: pointer; transition: all 0.2s; min-height: 44px;
+    }
+    .reward-card:active { background: rgba(255,215,0,0.15); transform: scale(0.97); }
+    .reward-emoji { font-size: 2em; margin-bottom: 6px; }
+    .reward-name { font-weight: bold; font-size: 0.85em; margin-bottom: 4px; }
+    .reward-cost { color: #ffd700; font-weight: bold; font-size: 0.85em; }
+
+    /* HOLIDAY TRAINING */
+    .day-selector { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .day-btn {
+      width: 44px; height: 44px; border-radius: 10px;
+      border: 1.5px solid rgba(30,136,229,0.3);
+      background: rgba(255,255,255,0.05);
+      color: #90caf9; font-size: 0.8em; font-weight: bold;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .day-btn.active { background: linear-gradient(135deg, #1e88e5, #00bcd4); border-color: #00bcd4; color: #fff; }
+    .day-btn.pass { border-color: #4caf50; color: #81c784; }
+    .day-btn.mid { border-color: #ffd700; color: #ffd700; }
+    .day-btn.fail { border-color: #f44336; color: #ef9a9a; }
+    .week-badge {
+      display: inline-block; padding: 4px 14px;
+      background: rgba(255,193,7,0.15); border: 1px solid rgba(255,193,7,0.4);
+      border-radius: 20px; color: #ffd700; font-size: 0.8em; font-weight: bold; margin-bottom: 14px;
+    }
+    .record-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .record-box {
+      flex: 1; min-width: 90px;
+      background: rgba(0,188,212,0.08); border: 1px solid rgba(0,188,212,0.2);
+      border-radius: 10px; padding: 10px; text-align: center;
+    }
+    .record-box .rec-label { font-size: 0.7em; color: #90caf9; margin-bottom: 4px; }
+    .record-box .rec-val { font-size: 1.3em; font-weight: bold; color: #00bcd4; }
+    .number-input {
+      width: 80px; padding: 8px; text-align: center;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(30,136,229,0.3);
+      border-radius: 8px; color: #fff; font-size: 1em; font-weight: bold;
+    }
+    .scorecard { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+    .score-cell {
+      width: 40px; height: 40px; border-radius: 8px;
+      background: rgba(255,255,255,0.07);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 0.65em; cursor: pointer; border: 1.5px solid transparent;
+      transition: all 0.15s;
+    }
+    .score-cell.current { border-color: #00bcd4; }
+    .score-cell.pass { background: rgba(76,175,80,0.25); color: #81c784; }
+    .score-cell.mid { background: rgba(255,215,0,0.2); color: #ffd700; }
+    .score-cell.fail { background: rgba(244,67,54,0.2); color: #ef9a9a; }
+    .reflection-box {
+      width: 100%; padding: 10px; margin-top: 6px;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(30,136,229,0.2);
+      border-radius: 10px; color: #fff; font-size: 0.9em; min-height: 60px; resize: none;
+    }
+
+    /* HEIGHT */
+    .height-input-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .height-input-row input {
+      flex: 1; min-width: 100px; padding: 10px 14px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(30,136,229,0.3);
+      border-radius: 10px; color: #fff; font-size: 0.95em;
+    }
+    .height-input-row input::placeholder { color: rgba(255,255,255,0.4); }
+    .btn {
+      padding: 10px 20px; background: linear-gradient(135deg, #1e88e5, #00bcd4);
+      border: none; border-radius: 10px; color: #fff; font-weight: bold;
+      cursor: pointer; font-size: 0.9em; min-height: 44px; transition: all 0.2s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .height-result { margin-top: 12px; padding: 14px; background: rgba(0,0,0,0.2); border-radius: 12px; line-height: 1.6; }
+    .milestone-table { width: 100%; border-collapse: collapse; font-size: 0.82em; margin-top: 12px; }
+    .milestone-table th { color: #00bcd4; padding: 8px 6px; text-align: center; border-bottom: 1px solid rgba(30,136,229,0.2); }
+    .milestone-table td { padding: 7px 6px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .milestone-table tr.highlight td { background: rgba(255,215,0,0.1); color: #ffd700; font-weight: bold; }
+
+    /* AFFIRMATIONS */
+    .aff-card {
+      background: rgba(255,255,255,0.05); border: 1.5px solid rgba(30,136,229,0.2);
+      border-radius: 14px; padding: 16px; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 14px;
+      transition: all 0.3s;
+    }
+    .aff-card.glowing {
+      border-color: #ffd700;
+      background: rgba(255,215,0,0.08);
+      box-shadow: 0 0 20px rgba(255,215,0,0.25);
+    }
+    .aff-num { font-size: 1.4em; font-weight: 900; color: rgba(30,136,229,0.5); flex-shrink: 0; width: 30px; }
+    .aff-words { flex: 1; font-size: 0.95em; line-height: 1.4; }
+    .say-btn {
+      padding: 8px 14px; background: rgba(255,215,0,0.15);
+      border: 1px solid rgba(255,215,0,0.4); border-radius: 20px;
+      color: #ffd700; font-size: 0.78em; font-weight: bold;
+      cursor: pointer; flex-shrink: 0; min-height: 36px; transition: all 0.2s;
+    }
+    .say-btn:active { background: rgba(255,215,0,0.3); }
+    .say-btn.said { background: rgba(255,215,0,0.25); color: #fff; }
+
+    /* TRIAL COUNTDOWNS */
+    .trial-item {
+      padding: 12px 14px; border-radius: 12px;
+      background: rgba(255,255,255,0.04); margin-bottom: 8px;
+      border-left: 4px solid;
+    }
+    .trial-name { font-weight: 600; font-size: 0.9em; margin-bottom: 4px; }
+    .trial-days { font-size: 1.1em; font-weight: bold; }
+    .trial-warning {
+      display: inline-block; margin-top: 6px;
+      background: rgba(255,87,34,0.2); border: 1px solid #ff5722;
+      border-radius: 10px; padding: 2px 10px; font-size: 0.75em; color: #ff8a65; font-weight: bold;
+    }
+    .trial-update-btn {
+      margin-top: 8px; padding: 6px 12px;
+      background: rgba(30,136,229,0.15); border: 1px solid rgba(30,136,229,0.3);
+      border-radius: 10px; color: #90caf9; font-size: 0.75em; cursor: pointer;
+    }
+
+    /* MY WORLD */
+    .media-card {
+      background: rgba(255,255,255,0.04); border-radius: 14px;
+      padding: 14px; margin-bottom: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .media-icon { font-size: 2em; flex-shrink: 0; }
+    .media-info h4 { font-size: 0.95em; margin-bottom: 4px; color: #fff; }
+    .media-info p { font-size: 0.82em; color: #90caf9; line-height: 1.35; }
+    .media-platform { font-size: 0.72em; color: #00bcd4; margin-top: 4px; display: inline-block; }
+    .rule-banner {
+      background: rgba(255,87,34,0.1); border: 1.5px solid rgba(255,87,34,0.3);
+      border-radius: 12px; padding: 14px; margin-bottom: 16px; text-align: center;
+      font-size: 0.95em; line-height: 1.5;
+    }
+
+    /* MY PATH TIMELINE */
+    .timeline-header {
+      text-align: center; margin-bottom: 20px;
+    }
+    .timeline-header .destination {
+      font-size: 1.5em; font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #ff6f00);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .timeline-header .subtitle { color: #90caf9; font-size: 0.85em; }
+    .timeline { position: relative; padding-left: 30px; }
+    .timeline::before {
+      content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+      width: 2px; background: linear-gradient(180deg, #1e88e5, #00bcd4, #ffd700);
+    }
+    .tl-item {
+      position: relative; margin-bottom: 18px;
+      background: rgba(255,255,255,0.05); border-radius: 14px; padding: 14px;
+      border: 1px solid rgba(30,136,229,0.2);
+    }
+    .tl-item::before {
+      content: ''; position: absolute; left: -24px; top: 18px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #1e88e5; border: 2px solid #0d47a1;
+    }
+    .tl-item.current { border-color: #00bcd4; background: rgba(0,188,212,0.08); }
+    .tl-item.current::before { background: #00bcd4; box-shadow: 0 0 10px #00bcd4; }
+    .tl-item.destination {
+      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,111,0,0.08));
+      border-color: rgba(255,215,0,0.5);
+    }
+    .tl-item.destination::before { background: #ffd700; box-shadow: 0 0 14px #ffd700; }
+    .tl-age { font-size: 0.75em; color: #00bcd4; letter-spacing: 1px; margin-bottom: 4px; font-weight: bold; }
+    .tl-milestone { font-size: 0.95em; font-weight: 600; }
+    .tl-status { font-size: 0.75em; margin-top: 4px; }
+    .status-now { color: #00e676; font-weight: bold; }
+    .status-upcoming { color: #ffd700; }
+    .status-future { color: #90caf9; }
+    .sikh-games-banner {
+      background: linear-gradient(135deg, rgba(255,165,0,0.15), rgba(30,136,229,0.1));
+      border: 2px solid rgba(255,165,0,0.4); border-radius: 14px;
+      padding: 16px; margin-top: 16px; text-align: center;
+    }
+    .sikh-games-banner .sg-title { font-size: 1.1em; font-weight: 900; color: #ffa726; margin-bottom: 6px; }
+    .sikh-games-banner .sg-sub { font-size: 0.85em; color: #90caf9; }
+    .sg-countdown { font-size: 1.8em; font-weight: 900; color: #ffd700; margin: 8px 0; }
+    .path-quote {
+      margin-top: 20px; text-align: center; padding: 18px;
+      background: rgba(255,255,255,0.04); border-radius: 14px;
+      font-size: 0.9em; line-height: 1.6; color: #90caf9; font-style: italic;
+    }
+
+    /* BRAIN POWER */
+    .story-steps { counter-reset: step; }
+    .story-step {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 12px; background: rgba(255,255,255,0.04);
+      border-radius: 12px; margin-bottom: 8px;
+    }
+    .step-num {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #1e88e5, #00bcd4);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 0.9em; flex-shrink: 0;
+    }
+    .step-time { font-size: 0.75em; color: #ffd700; font-weight: bold; margin-bottom: 2px; }
+    .step-desc { font-size: 0.9em; line-height: 1.35; }
+    .journal-btn {
+      display: block; width: 100%; padding: 16px; margin: 10px 0;
+      background: linear-gradient(135deg, rgba(103,58,183,0.3), rgba(63,81,181,0.2));
+      border: 1.5px solid rgba(103,58,183,0.5);
+      border-radius: 14px; color: #fff; font-size: 1em; font-weight: bold;
+      cursor: pointer; text-align: center; text-decoration: none;
+      transition: all 0.2s;
+    }
+    .journal-btn:active { transform: scale(0.98); }
+    .book-card {
+      background: rgba(255,255,255,0.04); border-radius: 12px;
+      padding: 12px 14px; margin-bottom: 8px;
+      border-left: 3px solid #1e88e5; cursor: pointer;
+    }
+    .book-title { font-weight: bold; font-size: 0.9em; }
+    .book-author { font-size: 0.78em; color: #90caf9; margin-top: 2px; }
+    .book-desc { font-size: 0.82em; color: #b0bec5; margin-top: 4px; display: none; line-height: 1.35; }
+    .book-card.expanded .book-desc { display: block; }
+
+    /* PARENT VIEW */
+    .analytics-table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+    .analytics-table th { color: #00bcd4; padding: 10px 8px; text-align: left; border-bottom: 1px solid rgba(30,136,229,0.2); }
+    .analytics-table td { padding: 9px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .pass-badge { background: #1b5e20; padding: 2px 10px; border-radius: 10px; font-size: 0.8em; }
+    .fail-badge { background: #b71c1c; padding: 2px 10px; border-radius: 10px; font-size: 0.8em; }
+    .export-btn {
+      width: 100%; padding: 14px; margin-top: 12px;
+      background: rgba(30,136,229,0.2); border: 1.5px solid rgba(30,136,229,0.4);
+      border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.95em;
+    }
+
+    /* CELEBRATION */
+    .celebration-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8); z-index: 999;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .celebration-content { text-align: center; padding: 30px; }
+
+    /* FUN FACTS */
+    .fact-block {
+      background: rgba(0,188,212,0.07); border-left: 3px solid #00bcd4;
+      border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;
+      font-size: 0.88em; color: #e0f7fa; line-height: 1.4;
+    }
+    .fact-block::before { content: "💡 "; }
+
+    /* UPCOMING */
+    .upcoming-banner {
+      background: rgba(255,215,0,0.07); border-left: 3px solid #ffd700;
+      border-radius: 12px; padding: 14px; margin-top: 4px;
+    }
+    .upcoming-banner h3 { color: #ffd700; margin-bottom: 10px; font-size: 0.95em; }
+    .event-item { padding: 7px 0; font-size: 0.9em; display: flex; gap: 10px; }
+
+    /* WEEK2 TOGGLE */
+    .week2-only { display: none; }
+    .info-box {
+      background: rgba(255,193,7,0.08); border: 1px solid rgba(255,193,7,0.25);
+      border-radius: 10px; padding: 10px 14px; margin-bottom: 10px;
+      font-size: 0.85em; color: #ffe082; line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ SAMRATH'S WORLD ⚽</h1>
+  <div class="header-row">
+    <div class="points-display">⭐ <span id="totalPoints">0</span> pts</div>
+    <div class="streak-badge">🔥 <span id="streakCount">0</span> day streak</div>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="progressBar"></div></div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="today" onclick="switchTab('today')">📋 Today</button>
+  <button class="tab-btn" data-tab="training" onclick="switchTab('training')">🏃 Holiday Training</button>
+  <button class="tab-btn" data-tab="grow" onclick="switchTab('grow')">📏 Grow Tall</button>
+  <button class="tab-btn" data-tab="soccer" onclick="switchTab('soccer')">⚽ Pro Soccer</button>
+  <button class="tab-btn" data-tab="brain" onclick="switchTab('brain')">🧠 Brain Power</button>
+  <button class="tab-btn" data-tab="world" onclick="switchTab('world')">🌍 My World</button>
+  <button class="tab-btn" data-tab="path" onclick="switchTab('path')">🚀 My Path</button>
+  <button class="tab-btn" data-tab="parent" onclick="switchTab('parent')">👩 Parent View</button>
+</nav>
+
+<div class="content">
+
+  <!-- ===== TODAY ===== -->
+  <div id="today" class="tab-pane active">
+
+    <div class="aff-banner" id="dailyAffBanner" onclick="sayDailyAff()">
+      <div class="aff-label">Today's Affirmation — Say it out loud</div>
+      <div class="aff-text" id="dailyAffText">Loading...</div>
+      <div class="aff-tap" id="dailyAffTap">Tap to mark as said (+3 pts)</div>
+    </div>
+
+    <button class="done-btn" id="doneBtn" onclick="doneForToday()">✅ Mark Day Complete (+2 pts)</button>
+
+    <div class="card">
+      <h2>🌅 Morning Routine</h2>
+      <ul class="task-list">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="m1" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Wake up — 7:00am</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="m2" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">Shower + brush teeth</span><span class="pts-badge">+3</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="m3" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">Eat breakfast — eggs, milk, fruit</span><span class="pts-badge">+3</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="m4" data-pts="1"><input type="checkbox" class="task-checkbox"><span class="task-text">Get dressed (clothes already out!)</span><span class="pts-badge">+1</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🏠 Chores</h2>
+      <ul class="task-list">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="c1" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Make bed</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="c2" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Pick up bedroom floor</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="c3" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">Help unload dishwasher</span><span class="pts-badge">+3</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="c4" data-pts="5"><input type="checkbox" class="task-checkbox"><span class="task-text">Clean toilet (Wednesday)</span><span class="pts-badge">+5</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🌙 Evening Routine</h2>
+      <ul class="task-list">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="e1" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Lay out tomorrow's clothes + pack bag</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="e2" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Pick up bedroom</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="e3" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">Brush teeth + wind down</span><span class="pts-badge">+3</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="e4" data-pts="5"><input type="checkbox" class="task-checkbox"><span class="task-text">Warm milk — in bed by 8:30pm</span><span class="pts-badge">+5</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🎁 Rewards Shop</h2>
+      <p style="font-size:0.85em; color:#90caf9; margin-bottom:12px;">Spend your points on something good!</p>
+      <div class="rewards-grid">
+        <div class="reward-card" onclick="redeem('Ice cream treat', 20)"><div class="reward-emoji">🍦</div><div class="reward-name">Ice cream</div><div class="reward-cost">20 pts</div></div>
+        <div class="reward-card" onclick="redeem('30 min extra screen time', 30)"><div class="reward-emoji">🎮</div><div class="reward-name">30 min screen</div><div class="reward-cost">30 pts</div></div>
+        <div class="reward-card" onclick="redeem('Ice skating trip', 50)"><div class="reward-emoji">🧊</div><div class="reward-name">Ice skating</div><div class="reward-cost">50 pts</div></div>
+        <div class="reward-card" onclick="redeem('Choose the weekend activity', 60)"><div class="reward-emoji">🎯</div><div class="reward-name">Choose activity</div><div class="reward-cost">60 pts</div></div>
+        <div class="reward-card" onclick="redeem('$5 pocket money', 80)"><div class="reward-emoji">💰</div><div class="reward-name">$5 pocket money</div><div class="reward-cost">80 pts</div></div>
+        <div class="reward-card" onclick="redeem('$10 towards something special', 150)"><div class="reward-emoji">🌟</div><div class="reward-name">$10 special</div><div class="reward-cost">150 pts</div></div>
+      </div>
+    </div>
+
+    <div class="upcoming-banner">
+      <h3>🎉 COMING UP</h3>
+      <div class="event-item">🧊 <span><strong>Ice Skating</strong> — iceHQ Reservoir (monthly)</span></div>
+      <div class="event-item">⚽ <span><strong>Birthday Party</strong> — Indoor Soccer June 2026</span></div>
+      <div class="event-item">✈️ <span><strong>Holiday Trip 2026</strong> — Bali or WA</span></div>
+      <div class="event-item">🏃 <span><strong>Soccer Training</strong> Mon-Fri</span></div>
+    </div>
+  </div>
+
+  <!-- ===== HOLIDAY TRAINING ===== -->
+  <div id="training" class="tab-pane">
+    <div class="card">
+      <h2>🏆 14-Day Holiday Challenge</h2>
+      <div class="info-box">This is not easy. It is not meant to be easy. Train when no one is watching. Score yourself honestly. <strong>Pass = 80+ points.</strong></div>
+      <div class="day-selector" id="daySelector"></div>
+      <div id="weekBadge" class="week-badge">WEEK 1</div>
+    </div>
+
+    <div class="card">
+      <h2>☀️ Morning Session — 45 min</h2>
+
+      <div class="record-row">
+        <div class="record-box"><div class="rec-label">Yesterday<br>Elastico</div><div class="rec-val" id="ystElastico">—</div></div>
+        <div class="record-box"><div class="rec-label">Yesterday<br>Goals/20</div><div class="rec-val" id="ystGoals">—</div></div>
+        <div class="record-box"><div class="rec-label">Best<br>Juggling</div><div class="rec-val" id="bestJuggling">—</div></div>
+      </div>
+
+      <ul class="task-list">
+        <li class="task-item" onclick="toggleHoliday(this)" data-id="h_warmup" data-pts="5"><input type="checkbox" class="task-checkbox"><span class="task-text">🔥 Warm up — jog 3 laps + 10 jump squats</span><span class="pts-badge">+5</span></li>
+        <li class="task-item" onclick="toggleHoliday(this)" data-id="h_mastery" data-pts="20"><input type="checkbox" class="task-checkbox"><span class="task-text">⚽ Ball mastery 10 min — toe taps, inside/outside rolls, la croqueta</span><span class="pts-badge">+20</span></li>
+        <li class="task-item" onclick="toggleHoliday(this)" data-id="h_skills" data-pts="20"><input type="checkbox" class="task-checkbox"><span class="task-text">🎯 Skill moves — stepover x10, fake shot x10, chop x10 + elastico count below</span><span class="pts-badge">+20</span></li>
+        <li class="task-item" onclick="toggleHoliday(this)" data-id="h_finish" data-pts="15"><input type="checkbox" class="task-checkbox"><span class="task-text">🥅 Finishing — 20 shots, every shot needs a move first. Goals count below.</span><span class="pts-badge">+15</span></li>
+        <li class="task-item" onclick="toggleHoliday(this)" data-id="h_sprints" data-pts="20"><input type="checkbox" class="task-checkbox"><span class="task-text">💨 Sprints with ball — <span id="sprintLabel">10 rounds</span>. Walk back between each. DO NOT STOP.</span><span class="pts-badge">+20</span></li>
+      </ul>
+
+      <h3>Record your numbers</h3>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+        <div><div style="font-size:0.78em; color:#90caf9; margin-bottom:4px;">Elastico count</div><input type="number" class="number-input" id="elasticoInput" placeholder="0" min="0" oninput="saveHolidayNumbers()"></div>
+        <div><div style="font-size:0.78em; color:#90caf9; margin-bottom:4px;">Goals out of 20</div><input type="number" class="number-input" id="goalsInput" placeholder="0" min="0" max="20" oninput="saveHolidayNumbers()"></div>
+      </div>
+
+      <div class="week2-only" id="week2block">
+        <h3 style="color:#ffd700;">⚡ Week 2 Challenge</h3>
+        <ul class="task-list">
+          <li class="task-item" onclick="toggleHoliday(this)" data-id="h_rainbow" data-pts="5"><input type="checkbox" class="task-checkbox"><span class="task-text">🌈 Rainbow flick attempts — how many did you land?</span><span class="pts-badge">+5</span></li>
+        </ul>
+        <div style="margin-top:8px;"><div style="font-size:0.78em; color:#90caf9; margin-bottom:4px;">Rainbow flicks landed</div><input type="number" class="number-input" id="rainbowInput" placeholder="0" min="0" oninput="saveHolidayNumbers()"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🌆 Afternoon Session — 20 min</h2>
+      <ul class="task-list">
+        <li class="task-item" onclick="toggleHoliday(this)" data-id="h_juggle" data-pts="10"><input type="checkbox" class="task-checkbox"><span class="task-text">🎪 Juggling — best score today (beat yesterday!). Number below.</span><span class="pts-badge">+10</span></li>
+        <li class="task-item" onclick="toggleHoliday(this)" data-id="h_wall" data-pts="10"><input type="checkbox" class="task-checkbox"><span class="task-text">🦶 Right foot wall work — 5 min LEFT only, then 5 min RIGHT only. Nothing on me is weak.</span><span class="pts-badge">+10</span></li>
+      </ul>
+      <div style="margin-top:10px;"><div style="font-size:0.78em; color:#90caf9; margin-bottom:4px;">Juggling best score</div><input type="number" class="number-input" id="jugglingInput" placeholder="0" min="0" oninput="saveHolidayNumbers()"></div>
+    </div>
+
+    <div class="card">
+      <h2>📝 Daily Reflection</h2>
+      <div style="margin-bottom:8px;"><label style="font-size:0.85em; color:#90caf9;">One thing I will improve tomorrow:</label><br><textarea class="reflection-box" id="reflectionInput" placeholder="Write it here..." oninput="saveReflection()"></textarea></div>
+      <div id="yesterdayReflection" style="font-size:0.82em; color:#90caf9; font-style:italic; margin-top:8px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>📊 14-Day Scorecard</h2>
+      <div class="scorecard" id="scorecard"></div>
+      <div style="display:flex; gap:10px; margin-top:10px; font-size:0.78em;">
+        <span style="color:#81c784;">■ Pass (80+)</span>
+        <span style="color:#ffd700;">■ Partial (50-79)</span>
+        <span style="color:#ef9a9a;">■ Incomplete</span>
+        <span style="color:#90caf9;">■ Not done</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GROW TALL ===== -->
+  <div id="grow" class="tab-pane">
+    <div class="card">
+      <h2>📏 Your Height Check</h2>
+      <div class="height-input-row">
+        <input type="number" id="heightInput" placeholder="Your height (cm)" step="0.5">
+        <input type="number" id="ageInput" placeholder="Your age" value="10" min="8" max="18">
+        <button class="btn" onclick="checkHeight()">Check</button>
+      </div>
+      <div id="heightResult" class="height-result" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <h2>📊 Height Milestones — Are You On Track?</h2>
+      <table class="milestone-table" id="milestoneTable">
+        <thead><tr><th>Age</th><th>6'0" Track</th><th>6'2"+ Track</th></tr></thead>
+        <tbody>
+          <tr data-age="10"><td>10</td><td>140-145 cm</td><td>145-150 cm</td></tr>
+          <tr data-age="11"><td>11</td><td>145-152 cm</td><td>150-157 cm</td></tr>
+          <tr data-age="12"><td>12</td><td>150-160 cm</td><td>157-165 cm</td></tr>
+          <tr data-age="13"><td>13</td><td>158-168 cm</td><td>165-173 cm</td></tr>
+          <tr data-age="14"><td>14</td><td>165-175 cm</td><td>173-181 cm</td></tr>
+          <tr data-age="15"><td>15</td><td>171-181 cm</td><td>179-186 cm</td></tr>
+          <tr data-age="16"><td>16</td><td>175-185 cm</td><td>183-190 cm</td></tr>
+          <tr data-age="17"><td>17</td><td>177-187 cm</td><td>186-192 cm</td></tr>
+          <tr data-age="18"><td>18</td><td>178-188 cm</td><td>188-193 cm</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>✅ Daily Grow Tall Habits</h2>
+      <ul class="task-list">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="g1" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">2 glasses of milk — calcium builds bones</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="g2" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">Protein at every meal — eggs, chicken, paneer, dal</span><span class="pts-badge">+3</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="g3" data-pts="5"><input type="checkbox" class="task-checkbox"><span class="task-text">Asleep by 8:30pm — growth hormone fires during deep sleep</span><span class="pts-badge">+5</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="g4" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">Stretch + hang from bar 5 mins</span><span class="pts-badge">+3</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="g5" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">No fizzy drinks today — Coke strips calcium from bones</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="g6" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Take vitamins Mum gives (D3, magnesium, omega-3)</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="g7" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Warm milk before bed (haldi doodh if possible)</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="g8" data-pts="1"><input type="checkbox" class="task-checkbox"><span class="task-text">Stand tall — posture check 3 times today</span><span class="pts-badge">+1</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>💡 Growth Facts</h2>
+      <div class="fact-block">Your mum's brother was short like you growing up. He played sport, ate right, and grew to 5'11. You have the same genes. Same path is possible.</div>
+      <div class="fact-block">Growth hormone fires in the first 90 minutes of sleep. Go to bed late and you waste your growing window. 8:30pm is not optional.</div>
+      <div class="fact-block">Thierry Henry was 6'2. Gareth Bale 6'1. Tall wingers own the pitch. Every glass of milk is an investment.</div>
+      <div class="fact-block">Protein builds bones AND muscle. Every meal where you skip protein is a missed growing opportunity.</div>
+    </div>
+  </div>
+
+  <!-- ===== PRO SOCCER ===== -->
+  <div id="soccer" class="tab-pane">
+
+    <div class="card">
+      <h2>⚽ Daily Training Habits</h2>
+      <ul class="task-list">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="s1" data-pts="5"><input type="checkbox" class="task-checkbox"><span class="task-text">Training session (Mon-Fri)</span><span class="pts-badge">+5</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="s2" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">50 ball touches at home — before or after training</span><span class="pts-badge">+3</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="s3" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">Right foot practice 10 min — "Nothing on me is weak"</span><span class="pts-badge">+3</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="s4" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Stretch before AND after training</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="s5" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">Eat protein within 30 min after training</span><span class="pts-badge">+3</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="s6" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Say one affirmation out loud before training</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="s7" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Watch 10 min of left winger highlights — study what they do</span><span class="pts-badge">+2</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>💬 My Affirmations</h2>
+      <p style="font-size:0.82em; color:#90caf9; margin-bottom:12px;">Tap SAY IT. Say it out loud. Mean every word.</p>
+      <div id="affirmationsList"></div>
+    </div>
+
+    <div class="card">
+      <h2>🎯 Weekly Goals</h2>
+      <ul class="task-list">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="w1" data-pts="10"><input type="checkbox" class="task-checkbox"><span class="task-text">Score at least 1 goal in a game or practice match</span><span class="pts-badge">+10</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="w2" data-pts="10"><input type="checkbox" class="task-checkbox"><span class="task-text">Complete all scheduled training sessions this week</span><span class="pts-badge">+10</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="w3" data-pts="8"><input type="checkbox" class="task-checkbox"><span class="task-text">Work on one weakness this week (right foot or stamina)</span><span class="pts-badge">+8</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="w4" data-pts="7"><input type="checkbox" class="task-checkbox"><span class="task-text">Help a teammate — pro players make the team better</span><span class="pts-badge">+7</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🏆 Clubs and Trials</h2>
+      <div id="trialCountdowns"></div>
+    </div>
+
+    <div class="card">
+      <h2>🏅 Tournaments 2026</h2>
+      <ul class="task-list" style="pointer-events:none;">
+        <li class="task-item"><span class="task-text">Big Fish Junior Tournament — Melbourne</span></li>
+        <li class="task-item"><span class="task-text">Melbourne Junior Football Festival — July holidays</span></li>
+        <li class="task-item"><span class="task-text">Sikh Sports Australia events — connect this year</span></li>
+      </ul>
+      <div class="sikh-games-banner" style="margin-top:12px;">
+        <div class="sg-title">🦁 SIKH GAMES 2027</div>
+        <div class="sg-countdown" id="sikhGamesCountdown">— days</div>
+        <div class="sg-sub">Be the name everyone already knows before you walk on the pitch.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BRAIN POWER ===== -->
+  <div id="brain" class="tab-pane">
+    <div class="card">
+      <h2>✍️ Write A Story In 20 Minutes</h2>
+      <div class="info-box">NAPLAN story writing. Every time you do this, writing gets easier. 20 minutes. One story. Go.</div>
+      <div class="story-steps">
+        <div class="story-step"><div class="step-num">1</div><div><div class="step-time">2 MIN</div><div class="step-desc"><strong>Your character.</strong> Who are they? What do they want more than anything in the world?</div></div></div>
+        <div class="story-step"><div class="step-num">2</div><div><div class="step-time">3 MIN</div><div class="step-desc"><strong>The problem.</strong> What goes wrong? What stands in their way?</div></div></div>
+        <div class="story-step"><div class="step-num">3</div><div><div class="step-time">5 MIN</div><div class="step-desc"><strong>Write the beginning.</strong> Set the scene. Introduce your character. Keep it short.</div></div></div>
+        <div class="story-step"><div class="step-num">4</div><div><div class="step-time">7 MIN</div><div class="step-desc"><strong>Write the middle.</strong> The problem gets bigger. Things get harder. Don't give up on your character.</div></div></div>
+        <div class="story-step"><div class="step-num">5</div><div><div class="step-time">3 MIN</div><div class="step-desc"><strong>Write the end.</strong> They solve the problem — or they learn something. Done.</div></div></div>
+      </div>
+      <ul class="task-list" style="margin-top:12px;">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="n1" data-pts="15"><input type="checkbox" class="task-checkbox"><span class="task-text">Completed all 5 story steps today</span><span class="pts-badge">+15</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>📓 Write In Your Journal</h2>
+      <p style="font-size:0.85em; color:#90caf9; margin-bottom:12px;">5 minutes. What did you do today? What did you learn? What are you proud of? Once you start, you'll write more. That's fine.</p>
+      <a class="journal-btn" href="journal://" onclick="journalOpened()">📓 Open Journal App</a>
+      <ul class="task-list">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="j1" data-pts="5"><input type="checkbox" class="task-checkbox"><span class="task-text">I wrote in my journal today</span><span class="pts-badge">+5</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>📖 Reading</h2>
+      <ul class="task-list">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="r1" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">Read for 15 minutes today</span><span class="pts-badge">+3</span></li>
+      </ul>
+      <h3>Books To Read</h3>
+      <div class="book-card" onclick="this.classList.toggle('expanded')">
+        <div class="book-title">Kick — Walter Dean Myers</div>
+        <div class="book-author">Fiction</div>
+        <div class="book-desc">A story about a young soccer player who has to fight for his dream. Fast-paced. Hard to put down. Perfect for you.</div>
+      </div>
+      <div class="book-card" onclick="this.classList.toggle('expanded')">
+        <div class="book-title">Messi: The Boy Who Could Not Be Stopped</div>
+        <div class="book-author">Children's Biography</div>
+        <div class="book-desc">He was told he was too small. Too sick. He became the greatest of all time. Read this and remember it when things get hard.</div>
+      </div>
+      <div class="book-card" onclick="this.classList.toggle('expanded')">
+        <div class="book-title">Ronaldo: The Boy Who Had a Dream</div>
+        <div class="book-author">Children's Biography</div>
+        <div class="book-desc">From a tiny island with no money. To the richest player in history. The work he put in between age 10 and 18 is what made him.</div>
+      </div>
+      <div class="book-card" onclick="this.classList.toggle('expanded')">
+        <div class="book-title">I Am Zlatan (Young Reader's Edition)</div>
+        <div class="book-author">Autobiography</div>
+        <div class="book-desc">Zlatan grew up with nothing. He never stopped believing in himself even when everyone else stopped. One of the most honest sports books ever written.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧠 Study Habits</h2>
+      <ul class="task-list">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="st1" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">Practice 10 maths problems</span><span class="pts-badge">+3</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="st2" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Learn 3 new vocabulary words</span><span class="pts-badge">+2</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="st3" data-pts="5"><input type="checkbox" class="task-checkbox"><span class="task-text">Teach someone something you learned today — BONUS</span><span class="pts-badge">+5</span></li>
+        <li class="task-item" onclick="toggleCheck(this)" data-id="st4" data-pts="15"><input type="checkbox" class="task-checkbox"><span class="task-text">Complete one NAPLAN practice test section (weekly)</span><span class="pts-badge">+15</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== MY WORLD ===== -->
+  <div id="world" class="tab-pane">
+    <div class="rule-banner">
+      <strong style="color:#ffd700; font-size:1.1em;">"What you see, hear, read and watch — you become."</strong><br>
+      <span style="color:#90caf9;">Choose your world carefully. Every hour of Roblox or every hour building the player you want to be. Your choice.</span>
+    </div>
+
+    <div class="card">
+      <h2>🎬 Soccer Movies</h2>
+      <p style="font-size:0.82em; color:#90caf9; margin-bottom:12px;">Watch like a student. Notice what players do when things go wrong. One movie = screen time that builds you.</p>
+      <div class="media-card"><div class="media-icon">⚽</div><div class="media-info"><h4>Goal! (2005)</h4><p>A boy from nothing makes it to Newcastle United. This is the story closest to yours. Watch it and you will feel something.</p><span class="media-platform">YouTube / Amazon Prime</span></div></div>
+      <div class="media-card"><div class="media-icon">👧</div><div class="media-info"><h4>Bend It Like Beckham (2002)</h4><p>She was told she couldn't play because of who she was. She played anyway. Sound familiar?</p><span class="media-platform">Netflix / Streaming</span></div></div>
+      <div class="media-card"><div class="media-icon">🏆</div><div class="media-info"><h4>Next Goal Wins (2023)</h4><p>The worst international team in the world. One coach. One mission. Funny and real.</p><span class="media-platform">Disney+</span></div></div>
+      <div class="media-card"><div class="media-icon">🌍</div><div class="media-info"><h4>The Beautiful Game (2024)</h4><p>Players who had nothing — playing for everything. This one hits different.</p><span class="media-platform">Netflix</span></div></div>
+      <ul class="task-list" style="margin-top:10px;">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="mv1" data-pts="3"><input type="checkbox" class="task-checkbox"><span class="task-text">Watched a soccer movie this week</span><span class="pts-badge">+3</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>📺 YouTube — Watch Like A Pro</h2>
+      <p style="font-size:0.82em; color:#90caf9; margin-bottom:12px;">These channels will teach you more than Roblox ever will.</p>
+      <div class="media-card"><div class="media-icon">🎪</div><div class="media-info"><h4>F2 Freestylers</h4><p>The best skill tutorial channel on YouTube. Elastico, la croqueta, stepover masterclasses. Search your move and learn the pro version.</p></div></div>
+      <div class="media-card"><div class="media-icon">🧠</div><div class="media-info"><h4>Tifo Football</h4><p>Explains how the game works — tactics, positions, why great wingers do what they do. Watch the left winger videos.</p></div></div>
+      <div class="media-card"><div class="media-icon">📰</div><div class="media-info"><h4>Football Daily</h4><p>Stories about how pros made it. Career histories, top 10 lists, player journeys. Good to watch before bed instead of random videos.</p></div></div>
+      <ul class="task-list" style="margin-top:10px;">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="yt1" data-pts="2"><input type="checkbox" class="task-checkbox"><span class="task-text">Watched a soccer YouTube video today (not highlights — something you can learn from)</span><span class="pts-badge">+2</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🎮 Better Games</h2>
+      <div class="info-box"><strong>The rule:</strong> Score! Hero or EA FC = +5 pts. Roblox/Rivals = 0 pts. Same screen time. Different result.</div>
+      <div class="media-card"><div class="media-icon">🧩</div><div class="media-info"><h4>Score! Hero</h4><p>You solve real match situations by drawing the path of the ball. Like a soccer puzzle. Free on iOS. Actually makes you think about the game.</p></div></div>
+      <div class="media-card"><div class="media-icon">⚽</div><div class="media-info"><h4>EA Sports FC Mobile</h4><p>Build your own club, play as your favourite players. Free on iOS. You'll end up watching YouTube just to figure out what moves to use.</p></div></div>
+      <div class="media-card"><div class="media-icon">🏗️</div><div class="media-info"><h4>Dream League Soccer</h4><p>Start from nothing. Build a team. Reach the top. Free on iOS. Same feeling as Rivals but you're building something soccer-related.</p></div></div>
+      <ul class="task-list" style="margin-top:10px;">
+        <li class="task-item" onclick="toggleCheck(this)" data-id="gm1" data-pts="5"><input type="checkbox" class="task-checkbox"><span class="task-text">Played a soccer game today (Score! Hero or EA FC)</span><span class="pts-badge">+5</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== MY PATH ===== -->
+  <div id="path" class="tab-pane">
+    <div class="timeline-header">
+      <div class="destination">PREMIER LEAGUE / BUNDESLIGA</div>
+      <div style="font-size:0.9em; color:#ffd700; font-weight:bold; margin-bottom:4px;">THE DESTINATION. THE ONLY ONE.</div>
+      <div class="subtitle">This is not a dream. It is a plan. Every single day you train, you get closer.</div>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item current">
+        <div class="tl-age">AGE 10 — RIGHT NOW</div>
+        <div class="tl-milestone">14-Day Holiday Training Challenge</div>
+        <div class="tl-status status-now">IN PROGRESS — This is where it starts</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-age">AGE 10-11 — 2026/2027</div>
+        <div class="tl-milestone">NPL Club Trial — Northern Rangers FC / Preston Lions</div>
+        <div class="tl-status status-upcoming">UPCOMING — Contact coaches now</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-age">AGE 11-12 — 2027</div>
+        <div class="tl-milestone">Melbourne City FC Academy Trial + Melbourne Victory Academy</div>
+        <div class="tl-status status-upcoming">UPCOMING — February/March 2027</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-age">AGE 12-13 — 2028</div>
+        <div class="tl-milestone">Football Victoria Metro North Representative Squad</div>
+        <div class="tl-status status-future">FUTURE — Nominated through NPL club</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-age">AGE 13-14 — 2029/2030</div>
+        <div class="tl-milestone">FFV State Titles — National Scouts Watch This</div>
+        <div class="tl-status status-future">FUTURE — State-level visibility</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-age">AGE 14-15 — 2030/2031</div>
+        <div class="tl-milestone">Australia U15 National Camp — Socceroos Pathway</div>
+        <div class="tl-status status-future">FUTURE — Top performers only</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-age">AGE 15-16 — 2031/2032</div>
+        <div class="tl-milestone">Overseas Trial — Netherlands or UK Academy</div>
+        <div class="tl-status status-future">FUTURE — One trip. Everything changes.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-age">AGE 16-17 — 2032/2033</div>
+        <div class="tl-milestone">Professional Contract Offer</div>
+        <div class="tl-status status-future">FUTURE — A-League or European club</div>
+      </div>
+      <div class="tl-item destination">
+        <div class="tl-age">AGE 17-21 — 2033-2037</div>
+        <div class="tl-milestone" style="color:#ffd700; font-size:1.05em;">PREMIER LEAGUE / BUNDESLIGA</div>
+        <div class="tl-status" style="color:#ffd700;">THE DESTINATION</div>
+      </div>
+    </div>
+
+    <div class="sikh-games-banner">
+      <div class="sg-title">🦁 SIKH GAMES 2027</div>
+      <div class="sg-countdown" id="pathSikhGamesCountdown">— days</div>
+      <div class="sg-sub">Be the name everyone already knows before you walk on the pitch. The Sikh community watches. Make them proud.</div>
+    </div>
+
+    <div class="path-quote">
+      "The greatest players in history all started exactly where you are now.<br>A backyard. A ball. A decision.<br><strong style="color:#fff;">Samrath, this is your decision.</strong>"
+    </div>
+  </div>
+
+  <!-- ===== PARENT VIEW ===== -->
+  <div id="parent" class="tab-pane">
+    <div class="card">
+      <h2>👩 Santosh — Parent Dashboard</h2>
+      <p style="font-size:0.85em; color:#90caf9; margin-bottom:14px;">Samrath's progress at a glance. Data saved on this device.</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+        <div class="record-box" style="flex:1; min-width:100px;"><div class="rec-label">Today's Points</div><div class="rec-val" id="p_todayPts">—</div></div>
+        <div class="record-box" style="flex:1; min-width:100px;"><div class="rec-label">Current Streak</div><div class="rec-val" id="p_streak">—</div></div>
+        <div class="record-box" style="flex:1; min-width:100px;"><div class="rec-label">Holiday Days Done</div><div class="rec-val" id="p_holidayDone">—</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📅 Daily History</h2>
+      <div id="analyticsTableWrap"></div>
+    </div>
+
+    <div class="card">
+      <h2>🏃 Holiday Training Progress</h2>
+      <div id="holidaySummary" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>📤 Export Report</h2>
+      <p style="font-size:0.85em; color:#90caf9; margin-bottom:10px;">Copies a full summary to your clipboard. Paste it into an email or message to yourself.</p>
+      <button class="export-btn" onclick="exportData()">📋 Copy Report To Clipboard</button>
+    </div>
+
+    <div class="card">
+      <h2>🌐 Host On GitHub Pages</h2>
+      <div style="font-size:0.85em; color:#90caf9; line-height:1.6;">
+        <p style="margin-bottom:8px;">To put this on his iPad permanently:</p>
+        <ol style="padding-left:18px; color:#e0f7fa;">
+          <li>Create a free GitHub account (github.com)</li>
+          <li>Create a new repo called <strong>samrath-world</strong></li>
+          <li>Upload this HTML file as <strong>index.html</strong></li>
+          <li>Go to Settings > Pages > Branch: main</li>
+          <li>Your URL will be: <strong>username.github.io/samrath-world</strong></li>
+          <li>Bookmark that URL in Safari on his iPad</li>
+          <li>Tap "Add to Home Screen" — it looks like an app</li>
+        </ol>
+        <p style="margin-top:10px; color:#ffd700;">Data stays on his iPad (localStorage). Free forever. No login needed.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ============================================================
+  // STATE & STORAGE
+  // ============================================================
+  const TODAY = new Date().toISOString().split('T')[0];
+  const DAY_KEY = 'samrath_day_' + TODAY;
+  const HOLIDAY_KEY = 'samrath_holiday_v2';
+  const HEIGHT_KEY = 'samrath_heights';
+  const HISTORY_KEY = 'samrath_history';
+  const RECORDS_KEY = 'samrath_records';
+
+  let state = JSON.parse(localStorage.getItem(DAY_KEY) || '{"points":0,"checked":{},"affSaid":false,"dayComplete":false,"openedToday":false}');
+  let holidayData = JSON.parse(localStorage.getItem(HOLIDAY_KEY) || '{}');
+  let records = JSON.parse(localStorage.getItem(RECORDS_KEY) || '{"juggling":0}');
+  let currentDay = 1;
+
+  const AFFIRMATIONS = [
+    "I train like a pro when no one is watching.",
+    "I am the best left winger in Victoria. I am proving it every single day.",
+    "Hard rounds make great players. I finish every sprint.",
+    "I am a Sikh warrior on the pitch. I never quit. Not once.",
+    "My right foot is getting stronger. Nothing on me is weak.",
+    "The ball and I speak the same language. It goes where I tell it.",
+    "I do not need anyone to push me. I push myself.",
+    "Someday the world will watch me play. I am building that player today.",
+    "Great players are made in backyards. This is where my career starts.",
+    "What I see, hear, read and watch — I become. I choose carefully."
+  ];
+
+  function save() { localStorage.setItem(DAY_KEY, JSON.stringify(state)); }
+  function saveHoliday() { localStorage.setItem(HOLIDAY_KEY, JSON.stringify(holidayData)); }
+  function saveRecords() { localStorage.setItem(RECORDS_KEY, JSON.stringify(records)); }
+
+  // ============================================================
+  // POINTS
+  // ============================================================
+  function addPoints(n) {
+    state.points = (state.points || 0) + n;
+    updateDisplay();
+    save();
+  }
+
+  function updateDisplay() {
+    document.getElementById('totalPoints').textContent = state.points || 0;
+    const pct = Math.min(((state.points || 0) / 500) * 100, 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+  }
+
+  // ============================================================
+  // CHECKBOXES (Today / Soccer / Brain / Grow)
+  // ============================================================
+  function toggleCheck(item) {
+    const cb = item.querySelector('.task-checkbox');
+    const id = item.dataset.id;
+    const pts = parseInt(item.dataset.pts) || 0;
+    cb.checked = !cb.checked;
+    if (cb.checked && !state.checked[id]) {
+      state.checked[id] = true;
+      addPoints(pts);
+      item.classList.add('completed');
+    } else if (!cb.checked && state.checked[id]) {
+      delete state.checked[id];
+      state.points = Math.max(0, (state.points || 0) - pts);
+      updateDisplay();
+      item.classList.remove('completed');
+      save();
+    }
+  }
+
+  function restoreChecks() {
+    document.querySelectorAll('[data-id]').forEach(item => {
+      const id = item.dataset.id;
+      const cb = item.querySelector('.task-checkbox');
+      if (cb && state.checked && state.checked[id]) {
+        cb.checked = true;
+        item.classList.add('completed');
+      }
+    });
+  }
+
+  // ============================================================
+  // HOLIDAY TRAINING
+  // ============================================================
+  function buildDaySelector() {
+    const sel = document.getElementById('daySelector');
+    sel.innerHTML = '';
+    for (let d = 1; d <= 14; d++) {
+      const dd = holidayData['day_' + d];
+      const sc = dd ? (dd.score || 0) : null;
+      let cls = 'day-btn';
+      if (sc !== null) { cls += sc >= 80 ? ' pass' : sc >= 50 ? ' mid' : ' fail'; }
+      sel.innerHTML += `<button class="${cls}" id="daybtn_${d}" onclick="selectDay(${d})">D${d}</button>`;
+    }
+    markActiveDay(currentDay);
+  }
+
+  function markActiveDay(d) {
+    document.querySelectorAll('.day-btn').forEach((b,i) => b.classList.toggle('active', i+1 === d));
+  }
+
+  function selectDay(d) {
+    currentDay = d;
+    markActiveDay(d);
+    const isW2 = d > 7;
+    document.getElementById('weekBadge').textContent = isW2 ? 'WEEK 2 — HARDER' : 'WEEK 1';
+    document.getElementById('sprintLabel').textContent = isW2 ? '15 rounds' : '10 rounds';
+    document.querySelectorAll('.week2-only').forEach(el => el.style.display = isW2 ? 'block' : 'none');
+
+    const dd = holidayData['day_' + d] || {};
+    // Restore numbers
+    document.getElementById('elasticoInput').value = dd.elastico || '';
+    document.getElementById('goalsInput').value = dd.goals || '';
+    document.getElementById('jugglingInput').value = dd.juggling || '';
+    if (document.getElementById('rainbowInput')) document.getElementById('rainbowInput').value = dd.rainbow || '';
+    document.getElementById('reflectionInput').value = dd.reflection || '';
+
+    // Restore holiday checkboxes
+    document.querySelectorAll('.holiday-check').forEach(cb => {
+      const id = cb.dataset.id;
+      const checked = dd.checked && dd.checked[id];
+      cb.checked = !!checked;
+      cb.closest('.task-item').classList.toggle('completed', !!checked);
+    });
+
+    // Yesterday's records
+    if (d > 1) {
+      const yd = holidayData['day_' + (d-1)] || {};
+      document.getElementById('ystElastico').textContent = yd.elastico || '—';
+      document.getElementById('ystGoals').textContent = yd.goals !== undefined ? yd.goals + '/20' : '—';
+    } else {
+      document.getElementById('ystElastico').textContent = '—';
+      document.getElementById('ystGoals').textContent = '—';
+    }
+    document.getElementById('bestJuggling').textContent = records.juggling || '—';
+
+    // Yesterday reflection
+    if (d > 1) {
+      const yd = holidayData['day_' + (d-1)] || {};
+      const yrefl = yd.reflection;
+      document.getElementById('yesterdayReflection').textContent = yrefl ? 'Yesterday you wrote: "' + yrefl + '"' : '';
+    } else {
+      document.getElementById('yesterdayReflection').textContent = '';
+    }
+  }
+
+  function toggleHoliday(item) {
+    const cb = item.querySelector('.task-checkbox');
+    const id = item.dataset.id;
+    const pts = parseInt(item.dataset.pts) || 0;
+    cb.checked = !cb.checked;
+    if (!holidayData['day_' + currentDay]) holidayData['day_' + currentDay] = { checked: {} };
+    const dd = holidayData['day_' + currentDay];
+    if (!dd.checked) dd.checked = {};
+    dd.checked[id] = cb.checked;
+    item.classList.toggle('completed', cb.checked);
+
+    if (cb.checked && !state.checked['hol_' + currentDay + '_' + id]) {
+      state.checked['hol_' + currentDay + '_' + id] = true;
+      addPoints(pts);
+    } else if (!cb.checked && state.checked['hol_' + currentDay + '_' + id]) {
+      delete state.checked['hol_' + currentDay + '_' + id];
+      state.points = Math.max(0, (state.points || 0) - pts);
+      updateDisplay(); save();
+    }
+    recalcDayScore(currentDay);
+    saveHoliday();
+    buildDaySelector();
+  }
+
+  function saveHolidayNumbers() {
+    if (!holidayData['day_' + currentDay]) holidayData['day_' + currentDay] = { checked: {} };
+    const dd = holidayData['day_' + currentDay];
+    const e = parseInt(document.getElementById('elasticoInput').value) || 0;
+    const g = parseInt(document.getElementById('goalsInput').value) || 0;
+    const j = parseInt(document.getElementById('jugglingInput').value) || 0;
+    const r = parseInt((document.getElementById('rainbowInput') || {}).value) || 0;
+    if (e) dd.elastico = e;
+    if (g) dd.goals = g;
+    if (j) { dd.juggling = j; if (j > (records.juggling || 0)) { records.juggling = j; saveRecords(); document.getElementById('bestJuggling').textContent = j; } }
+    if (r) dd.rainbow = r;
+    recalcDayScore(currentDay);
+    saveHoliday();
+  }
+
+  function saveReflection() {
+    if (!holidayData['day_' + currentDay]) holidayData['day_' + currentDay] = { checked: {} };
+    holidayData['day_' + currentDay].reflection = document.getElementById('reflectionInput').value;
+    saveHoliday();
+  }
+
+  function recalcDayScore(d) {
+    const dd = holidayData['day_' + d] || {};
+    const pts = { h_warmup:5, h_mastery:20, h_skills:20, h_finish:15, h_sprints:20, h_rainbow:5, h_juggle:10, h_wall:10 };
+    let score = 0;
+    if (dd.checked) Object.entries(pts).forEach(([id,p]) => { if (dd.checked[id]) score += p; });
+    dd.score = score;
+    holidayData['day_' + d] = dd;
+  }
+
+  function buildScorecard() {
+    const sc = document.getElementById('scorecard');
+    if (!sc) return;
+    sc.innerHTML = '';
+    for (let d = 1; d <= 14; d++) {
+      const dd = holidayData['day_' + d];
+      const s = dd && dd.score !== undefined ? dd.score : null;
+      let cls = 'score-cell';
+      if (d === currentDay) cls += ' current';
+      if (s !== null) cls += s >= 80 ? ' pass' : s >= 50 ? ' mid' : ' fail';
+      sc.innerHTML += `<div class="${cls}" onclick="selectDay(${d})"><strong>D${d}</strong><small>${s !== null ? s : '—'}</small></div>`;
+    }
+  }
+
+  // ============================================================
+  // HEIGHT
+  // ============================================================
+  function checkHeight() {
+    const h = parseFloat(document.getElementById('heightInput').value);
+    const age = parseInt(document.getElementById('ageInput').value) || 10;
+    if (!h) return;
+    const m = { 10:[140,145,145,150], 11:[145,152,150,157], 12:[150,160,157,165], 13:[158,168,165,173], 14:[165,175,173,181], 15:[171,181,179,186], 16:[175,185,183,190], 17:[177,187,186,192], 18:[178,188,188,193] };
+    const [l6, h6, l62, h62] = m[age] || m[10];
+    let msg, col;
+    if (h >= l62) { msg = "On track for 6'2\"+ — EXCEPTIONAL. Keep the habits going."; col = '#00e676'; }
+    else if (h >= l6) { msg = "On track for 6'0\"+ — solid. Push harder on sleep and protein."; col = '#ffd700'; }
+    else { msg = "Below the 6'0\" line right now. 9hrs sleep and protein every meal. This can change — your family has the genes."; col = '#ff5252'; }
+    const res = document.getElementById('heightResult');
+    res.style.display = 'block';
+    res.innerHTML = `<div style="color:${col};font-weight:bold;font-size:1.05em;">${msg}</div><div style="margin-top:8px;color:#90caf9;font-size:0.88em;">Age ${age} target — 6'0" track: ${l6}-${h6}cm | 6'2" track: ${l62}-${h62}cm<br>Your height: ${h}cm</div>`;
+    // Highlight milestone table row
+    document.querySelectorAll('#milestoneTable tr[data-age]').forEach(r => r.classList.toggle('highlight', parseInt(r.dataset.age) === age));
+  }
+
+  // ============================================================
+  // AFFIRMATIONS
+  // ============================================================
+  function buildAffirmations() {
+    const list = document.getElementById('affirmationsList');
+    if (!list) return;
+    list.innerHTML = AFFIRMATIONS.map((a,i) => `
+      <div class="aff-card" id="affCard_${i}">
+        <div class="aff-num">${i+1}</div>
+        <div class="aff-words">${a}</div>
+        <button class="say-btn ${state.checked && state.checked['aff_'+i] ? 'said' : ''}" onclick="event.stopPropagation(); sayAff(${i})">
+          ${state.checked && state.checked['aff_'+i] ? '✓ Said' : 'SAY IT'}
+        </button>
+      </div>`).join('');
+  }
+
+  function sayAff(i) {
+    const card = document.getElementById('affCard_' + i);
+    card.classList.add('glowing');
+    setTimeout(() => card.classList.remove('glowing'), 2500);
+    const btn = card.querySelector('.say-btn');
+    btn.textContent = '✓ Said'; btn.classList.add('said');
+    if (!(state.checked && state.checked['aff_'+i])) {
+      if (!state.checked) state.checked = {};
+      state.checked['aff_'+i] = true;
+      addPoints(2);
+    }
+  }
+
+  function getDailyAff() {
+    const d = Math.floor((new Date() - new Date(new Date().getFullYear(),0,0)) / 86400000);
+    return AFFIRMATIONS[d % AFFIRMATIONS.length];
+  }
+
+  function sayDailyAff() {
+    if (!state.affSaid) {
+      state.affSaid = true;
+      addPoints(3);
+      const banner = document.getElementById('dailyAffBanner');
+      banner.classList.add('said');
+      document.getElementById('dailyAffTap').textContent = '✓ Said it! +3 pts earned';
+    }
+  }
+
+  // ============================================================
+  // TRIAL COUNTDOWNS
+  // ============================================================
+  function buildTrials() {
+    const c = document.getElementById('trialCountdowns');
+    if (!c) return;
+    const trials = [
+      { name:'Northern Rangers FC — Contact Youth Coach', date:'2026-04-30', color:'#66bb6a' },
+      { name:'FFV Skill Acquisition Program — Call Football Victoria', date:'2026-05-15', color:'#42a5f5' },
+      { name:'Melbourne City FC Academy Trial', date:'2027-02-15', color:'#1e88e5' },
+      { name:'Melbourne Victory Academy Trial', date:'2027-03-01', color:'#7e57c2' },
+    ];
+    c.innerHTML = trials.map(t => {
+      const days = Math.ceil((new Date(t.date) - new Date()) / 86400000);
+      const warn = days > 0 && days <= 30 ? `<div class="trial-warning">⚡ GET READY — ${days} DAYS</div>` : '';
+      return `<div class="trial-item" style="border-left-color:${t.color}">
+        <div class="trial-name">${t.name}</div>
+        <div class="trial-days" style="color:${t.color}">${days > 0 ? days + ' days away' : days === 0 ? 'TODAY' : 'PASSED'}</div>
+        ${warn}
+      </div>`;
+    }).join('');
+  }
+
+  function buildSikhCountdown() {
+    const target = new Date('2027-07-15');
+    const days = Math.ceil((target - new Date()) / 86400000);
+    ['sikhGamesCountdown','pathSikhGamesCountdown'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = days > 0 ? days + ' days' : 'NOW';
+    });
+  }
+
+  // ============================================================
+  // DONE FOR TODAY
+  // ============================================================
+  function doneForToday() {
+    if (!state.dayComplete) {
+      state.dayComplete = true;
+      addPoints(2);
+      const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
+      history[TODAY] = { date: TODAY, points: state.points };
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      const btn = document.getElementById('doneBtn');
+      btn.textContent = '🏆 Day Complete! +2 pts earned';
+      btn.disabled = true;
+      showCelebration();
+    }
+  }
+
+  function showCelebration() {
+    const o = document.createElement('div');
+    o.className = 'celebration-overlay';
+    o.innerHTML = `<div class="celebration-content">
+      <div style="font-size:4em">🏆</div>
+      <div style="font-size:1.8em;font-weight:900;color:#ffd700;margin:10px 0;">DAY COMPLETE!</div>
+      <div style="font-size:1.1em;color:#90caf9;">${state.points} points earned today</div>
+      <button onclick="this.closest('.celebration-overlay').remove()" class="btn" style="margin-top:20px; font-size:1em;">Keep Going</button>
+    </div>`;
+    document.body.appendChild(o);
+    setTimeout(() => { if (o.parentNode) o.remove(); }, 4000);
+  }
+
+  // ============================================================
+  // TAB SWITCHING
+  // ============================================================
+  function switchTab(name) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(name).classList.add('active');
+    document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+    if (name === 'training') { buildDaySelector(); selectDay(currentDay); buildScorecard(); }
+    if (name === 'parent') { buildAnalytics(); }
+  }
+
+  // ============================================================
+  // PARENT ANALYTICS
+  // ============================================================
+  function buildAnalytics() {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
+    const entries = Object.values(history).sort((a,b) => b.date.localeCompare(a.date)).slice(0,21);
+
+    const wrap = document.getElementById('analyticsTableWrap');
+    if (!wrap) return;
+    if (entries.length === 0) {
+      wrap.innerHTML = '<p style="color:#90caf9;font-size:0.85em;">No completed days yet. Samrath must tap "Mark Day Complete" each day.</p>';
+    } else {
+      wrap.innerHTML = `<table class="analytics-table">
+        <thead><tr><th>Date</th><th>Points</th><th>Result</th></tr></thead>
+        <tbody>${entries.map(e => `<tr>
+          <td>${e.date}</td>
+          <td style="font-weight:bold;color:#ffd700;">${e.points}</td>
+          <td><span class="${e.points >= 80 ? 'pass-badge' : 'fail-badge'}">${e.points >= 80 ? 'PASS' : 'NEEDS WORK'}</span></td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+    }
+
+    // Holiday summary
+    let hs = '';
+    let doneDays = 0;
+    for (let d = 1; d <= 14; d++) {
+      const dd = holidayData['day_' + d];
+      const s = dd && dd.score !== undefined ? dd.score : null;
+      if (s !== null) doneDays++;
+      const col = s === null ? 'rgba(255,255,255,0.1)' : s >= 80 ? '#1b5e20' : s >= 50 ? '#7a6000' : '#7a1c1c';
+      hs += `<span title="Day ${d}: ${s !== null ? s + ' pts' : 'not done'}" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:7px;margin:3px;font-size:0.72em;background:${col};color:#fff;font-weight:bold;">D${d}</span>`;
+    }
+    const hsum = document.getElementById('holidaySummary');
+    if (hsum) hsum.innerHTML = doneDays === 0 ? '<p style="color:#90caf9;font-size:0.85em;">Holiday training not started yet.</p>' : hs;
+
+    // Stats
+    const p_today = document.getElementById('p_todayPts');
+    const p_streak = document.getElementById('p_streak');
+    const p_hd = document.getElementById('p_holidayDone');
+    if (p_today) p_today.textContent = state.points || 0;
+    if (p_streak) p_streak.textContent = getStreak();
+    if (p_hd) p_hd.textContent = doneDays + '/14';
+  }
+
+  function getStreak() {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
+    const dates = Object.keys(history).sort().reverse();
+    if (!dates.length) return 0;
+    let streak = 0;
+    let check = new Date();
+    for (const d of dates) {
+      const diff = Math.floor((check - new Date(d)) / 86400000);
+      if (diff <= 1) { streak++; check = new Date(d); }
+      else break;
+    }
+    return streak;
+  }
+
+  function exportData() {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
+    let txt = `SAMRATH'S PROGRESS REPORT — ${new Date().toLocaleDateString('en-AU')}\n\n`;
+    txt += `DAILY POINTS:\n`;
+    Object.values(history).sort((a,b)=>b.date.localeCompare(a.date)).forEach(e => {
+      txt += `${e.date}: ${e.points} pts — ${e.points>=80?'PASS':'NEEDS WORK'}\n`;
+    });
+    txt += `\nHOLIDAY TRAINING:\n`;
+    for (let d = 1; d <= 14; d++) {
+      const dd = holidayData['day_'+d];
+      if (dd) {
+        txt += `Day ${d}: ${dd.score||0}/100 — ${(dd.score||0)>=80?'PASS':'INCOMPLETE'}`;
+        if (dd.elastico) txt += ` | Elastico: ${dd.elastico}`;
+        if (dd.juggling) txt += ` | Juggling: ${dd.juggling}`;
+        if (dd.goals !== undefined) txt += ` | Goals: ${dd.goals}/20`;
+        txt += '\n';
+      }
+    }
+    navigator.clipboard.writeText(txt).then(() => alert('Copied! Paste it into Messages or Email.')).catch(() => alert(txt));
+  }
+
+  // ============================================================
+  // JOURNAL
+  // ============================================================
+  function journalOpened() {
+    if (!state.checked) state.checked = {};
+    // Just attempt to open — iOS will handle it
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  window.addEventListener('DOMContentLoaded', () => {
+    // +1 on open (once per day)
+    if (!state.openedToday) {
+      state.openedToday = true;
+      state.points = (state.points || 0) + 1;
+      save();
+    }
+
+    restoreChecks();
+    updateDisplay();
+    document.getElementById('streakCount').textContent = getStreak();
+
+    // Daily affirmation
+    const aff = getDailyAff();
+    const affEl = document.getElementById('dailyAffText');
+    if (affEl) affEl.textContent = aff;
+    if (state.affSaid) {
+      const banner = document.getElementById('dailyAffBanner');
+      if (banner) banner.classList.add('said');
+      const tap = document.getElementById('dailyAffTap');
+      if (tap) tap.textContent = '✓ Said it! +3 pts earned';
+    }
+
+    // Done button state
+    const btn = document.getElementById('doneBtn');
+    if (state.dayComplete && btn) { btn.textContent = '🏆 Day Complete!'; btn.disabled = true; }
+
+    // Build components
+    buildAffirmations();
+    buildTrials();
+    buildSikhCountdown();
+    buildDaySelector();
+    buildScorecard();
+  });
+</script>
+</body>
+</html>
